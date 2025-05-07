@@ -40,8 +40,8 @@ def Helmholtz_coils(r_low, r_up, d):
                     r_up * (r_up - Y * np.sin(Phi)) / dist2**3
 
     # 6. 对 phi_angles 进行数值积分
-    By_unscaled = np.trapezoid(dBy_integrand, x=phi_angles, axis=-1)
-    Bz_unscaled = np.trapezoid(dBz_integrand, x=phi_angles, axis=-1)
+    By_unscaled = np.trapz(dBy_integrand, x=phi_angles, axis=-1)
+    Bz_unscaled = np.trapz(dBz_integrand, x=phi_angles, axis=-1)
 
     # 7. 引入物理常数因子得到真实的磁场值 (单位 T)
     scaling_factor = (MU0 * I) / (4 * np.pi)
@@ -50,7 +50,7 @@ def Helmholtz_coils(r_low, r_up, d):
 
     print("磁场计算完成.")
     # 返回用于绘图的2D网格 (取一个phi切片) 和计算得到的磁场分量
-    return Y[:, :, 0], Z[:, :, 0], By, Bz
+    return Y, Z, By, Bz
 
 
 def plot_magnetic_field_streamplot(r_coil_1, r_coil_2, d_coils):
@@ -73,7 +73,7 @@ def plot_magnetic_field_streamplot(r_coil_1, r_coil_2, d_coils):
     start_points = np.vstack([sy.ravel(), sz.ravel()]).T
 
     # 3. 使用 plt.streamplot 绘制磁场流线图
-    plt.streamplot(Y_plot, Z_plot, By_field, Bz_field,
+    plt.streamplot(Y_plot[:,:,0],Z_plot[:,:,0], By_field, Bz_field,
                    density=1.5, color='k', linewidth=1.0,
                    arrowstyle='->', arrowsize=1.0, start_points=start_points)
 
