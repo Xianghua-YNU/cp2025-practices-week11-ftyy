@@ -19,7 +19,7 @@ def integrand(x):
     返回：
     float 或 numpy.ndarray：被积函数的值
     """
-    # 在这里实现被积函数
+    return (x**4 * np.exp(x)) / (np.exp(x) - 1)**2 # 被积函数
     pass
 
 def gauss_quadrature(f, a, b, n):
@@ -36,7 +36,11 @@ def gauss_quadrature(f, a, b, n):
     返回：
     float：积分结果
     """
-    # 在这里实现高斯积分
+    # 获取高斯点和权重
+    x, w = np.polynomial.legendre.leggauss(n)
+    # 将区间 [a, b] 映射到 [-1, 1]
+    t = 0.5 * (x + 1) * (b - a) + a
+    return 0.5 * (b - a) * np.sum(w * f(t))
     pass
 
 def cv(T):
@@ -50,11 +54,27 @@ def cv(T):
     float：热容值，单位：J/K
     """
     # 在这里实现热容计算
+    if T == 0:
+        return 0  # 避免除以零
+    x_max = theta_D / T
+    integral = gauss_quadrature(integrand, 0, x_max, 50)  # 使用 50 个高斯点
+    return 9 * V * rho * kB * (T / theta_D)**3 * integral
     pass
 
 def plot_cv():
     """绘制热容随温度的变化曲线"""
     # 在这里实现绘图功能
+    temperatures = np.linspace(5, 500, 500)  # 温度范围从 5K 到 500K
+    heat_capacities = [cv(T) for T in temperatures]
+    
+    plt.figure(figsize=(8, 6))
+    plt.plot(temperatures, heat_capacities, label="heat capacity $C_V$")
+    plt.xlabel("temperature $T$ (K)")
+    plt.ylabel("heat_capacity $C_V$ (J/K)")
+    plt.title("the variation of heat capacity with temperature")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
     pass
 
 def test_cv():
