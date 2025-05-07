@@ -58,7 +58,6 @@ def cv(T):
         return 0  # 避免除以零
     x_max = theta_D / T
     integral = gauss_quadrature(integrand, 0, x_max, 50)  # 使用 50 个高斯点
-    cv_value = 9 * V * rho * kB * (T / theta_D)**3 * integral
     return 9 * V * rho * kB * (T / theta_D)**3 * integral
     pass
 
