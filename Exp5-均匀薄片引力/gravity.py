@@ -13,6 +13,7 @@ from scipy.integrate import dblquad
 
 # 物理常数
 G = 6.67430e-11  # 万有引力常数 (单位: m^3 kg^-1 s^-2)
+m_particle = 1.0  # 质点质量 (kg)
 
 def calculate_sigma(length, mass):
     """
@@ -122,13 +123,16 @@ def plot_force_vs_height(length, mass, z_min=0.1, z_max=10, n_points=100):
     # TODO: 绘制曲线图
     # TODO: 添加理论极限线
     # TODO: 设置图表标题和标签
+    sigma = calculate_sigma(length, mass)
     z_vals = np.linspace(z_min, z_max, n_points)
     F_gauss = [calculate_force(length, mass, z, method='gauss') for z in z_vals]
     F_scipy = [calculate_force(length, mass, z, method='scipy') for z in z_vals]
+    Fz_limit = 2 * np.pi * G * sigma * m_particle
 
     plt.figure(figsize=(8,6))
     plt.plot(z_vals, F_gauss, label='Gauss-Legendre Quadrature', color='blue')
     plt.plot(z_vals, F_scipy, label='SciPy Integration', linestyle='--', color='red')
+    plt.axhline(Fz_limit, color='green', linestyle=':', label=r"$F_{z,\mathrm{limit}} = 2\pi G \sigma m$")
     plt.xlabel('Height z (m)')
     plt.ylabel('Gravitational Force F_z (N)')
     plt.title('Gravitational Force vs Height above Square Plate')
@@ -146,8 +150,18 @@ if __name__ == '__main__':
     
     # 计算并绘制引力曲线
     plot_force_vs_height(length, mass)
+
+    print("\n{:<8} {:<20} {:<20} {:<15} {:<15}".format(
+        "z (m)", "F_z (Gauss) (N)", "F_z (SciPy) (N)", "绝对差 (N)", "相对差"
+    ))
+    print("-" * 78)
     
     # 打印几个关键点的引力值
     for z in [0.1, 1, 5, 10]:
-        F = calculate_force(length, mass, z)
-        print(f"高度 z = {z:.1f}m 处的引力 F_z = {F:.3e} N")
+        F_gauss = calculate_force(length, mass, z, 'gauss')
+        F_scipy = calculate_force(length, mass, z, 'scipy')
+        diff = abs(F_gauss - F_scipy)
+        rel_diff = diff / F_scipy if F_scipy != 0 else 0
+        print("{:<8.1f} {:<20.3e} {:<20.3e} {:<15.3e} {:<15.3e}".format(
+            z, F_gauss, F_scipy, diff, rel_diff
+        ))
